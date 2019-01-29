@@ -1,9 +1,7 @@
 import React, { Component } from "react";
-import DatePicker from "react-datepicker";
-import TodoCustomItems from "./TodoCustomItems";
-import "./TodoList.css";
-import Modal from "react-modal";
-import 'react-datepicker/dist/react-datepicker.css';
+import DatePicker from "react-native-datepicker";
+
+import {Modal, Text, View, Button, TextInput} from 'react-native';
 
 class TodoListCustom extends Component {
 	constructor(props) {
@@ -160,39 +158,35 @@ class TodoListCustom extends Component {
   
 	render() {
 		return (
-			<div className="todoListMain">
-				<div className="header">
-					<form>
-						<button type="button" onClick={this.showUpdateModal} value='add'>add</button>
-						<button type="button" onClick={this.showUpdateModal} value='edit'>edit</button>
-						<button type="button" onClick={this.exportList}>export</button>
-						<button type="button" onClick={this.deleteItems}>delete</button>
-						<button type="button" onClick={this.deleteAll}>delete all</button>
-					</form>
-				</div>
-				<TodoCustomItems entries={this.state.items} select={this.selectItem}/>
-				<Modal isOpen={this.state.showModal}>
-					<h1>{this.state.modalType} a Task</h1>
-					<form>
-						<p>Name:</p>
-						<input value={this.state.taskName} onChange={this.taskNameHandler}>
-						</input>
-						<p>Due Date:</p>
-						<DatePicker selected={this.state.dueDate} onChange={this.dueDateHandler} />
-						<p>Description:</p>
-						<input value={this.state.description} onChange={this.descriptionHandler}>
-						</input>
-					</form>
-					<button type="button" onClick={() => {this.state.modalType === 'add' ? this.addItem() : this.editItem()}}>
-						{this.state.modalType}
-					</button>
-					<button type="button" onClick={this.hideModal}>
-						cancel
-					</button>
+			<View>
+				<View>
+					
+						<Button onPress={this.showUpdateModal} value='add' title="Add" />
+						<Button onPress={this.showUpdateModal} value='edit' title="Edit" />
+						<Button onPress={this.exportList} title="Export" />
+						<Button onPress={this.deleteItems} title="Delete" />
+						<Button onPress={this.deleteAll} title="DeleteAll" />
+				
+				</View>
+				
+				<Modal visible={this.state.showModal}>
+					<Text h1>{this.state.modalType} a Task</Text>
+				
+						<Text>Name:</Text>
+						<TextInput value={this.state.taskName} onChangeText={this.taskNameHandler} />
+						<Text>Due Date:</Text>
+						<DatePicker date={this.state.dueDate} onDateChange={this.dueDateHandler} />
+						<Text>Description:</Text>
+						<TextInput value={this.state.description} onChangeText={this.descriptionHandler} />
+				
+					<Button onPress={() => {this.state.modalType === 'add' ? this.addItem() : this.editItem()}} title={this.state.modalType} />
+					<Button onPress={this.hideModal} title="Cancel" />
 				</Modal>
-			</div>
+			</View>
 		);
 	}
 }
  
 export default TodoListCustom;
+//import TodoCustomItems from "./TodoCustomItems";
+//<TodoCustomItems entries={this.state.items} select={this.selectItem}/>

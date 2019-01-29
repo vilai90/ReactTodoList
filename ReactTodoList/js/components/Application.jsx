@@ -4,16 +4,27 @@ import Form from "./Form.jsx";
 import List from "./List.jsx";
 import UpdateModal from "./UpdateModal.jsx";
 
-const App = () => (
+const Application = () => (
   <div>
+		<h3>This is a standard React TodoList</h3>
+
+		<h3>This is a React TodoList utilizing Redux</h3>
+		<div>
+
+
+
+		</div>
+  </div>
+);
+export default Application;
+
+/*<div>
 		<h3>This is a standard React TodoList</h3>
 		<TodoListCustom/>
 		<h3>This is a React TodoList utilizing Redux</h3>
-		<div className="todoListMain">
+		<div>
 		<Form/>
 		<List/>
 		<UpdateModal /> 
 		</div>
-  </div>
-);
-export default App;
+  </div>*/
