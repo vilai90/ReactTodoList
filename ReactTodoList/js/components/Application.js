@@ -6,7 +6,6 @@ const Application = () => (
   <View>
 		<Text h3>This is a standard React TodoList</Text>
 			<TodoListCustom/>
-		<Text h3>This is a React TodoList utilizing Redux</Text>
 		<View>
 
 
