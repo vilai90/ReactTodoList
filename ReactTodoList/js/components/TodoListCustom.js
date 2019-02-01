@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import DatePicker from "react-native-datepicker";
-
-import {Modal, Text, View, Button, TextInput} from 'react-native';
+import TodoCustomItems from "./TodoCustomItems";
+import styles from "./TodoListStyles";
+import uuidv1 from "uuid";
+import {Linking, Modal, Text, View, Button, TextInput, StyleSheet} from 'react-native';
 
 class TodoListCustom extends Component {
 	constructor(props) {
@@ -10,7 +12,7 @@ class TodoListCustom extends Component {
 		this.state = {
 			items: [],
 			showModal: false,
-			modalType: '',
+			modalType: "",
 			taskName: '',
 			dueDate: null,
 			description: '',
@@ -28,15 +30,17 @@ class TodoListCustom extends Component {
 		this.descriptionHandler = this.descriptionHandler.bind(this);
     }
 	
-	addItem(e) {
-		if (this.state.taskName !== '' || this.state.dueDate !== "" || this.state.description !== "") {
+	addItem() {
+		const uid = uuidv1();
+		if (this.state.taskName !== "" || this.state.dueDate !== "" || this.state.description !== "") {
 			let newItem = {
 				name: this.state.taskName,
 				dueDate: this.state.dueDate,
 				description: this.state.description,
-				key: Date.now(),
+				key: uid,
+				style: styles.listItem,
 			};
-
+			
 			this.setState((prevState) => {
 				return { 
 					items: prevState.items.concat(newItem),
@@ -49,7 +53,7 @@ class TodoListCustom extends Component {
 		}
 	}
 	
-	editItem(e) {
+	editItem() {
 		let selectedItems = this.state.items.filter(function (item) { return item.selected; });
 		let selectedItem = selectedItems[0];
 
@@ -64,15 +68,17 @@ class TodoListCustom extends Component {
 		let selectedItems = this.state.items.map(function (item) {
 		if (item.key === key) {
 			if (!item.selected) { 
-				item.className = "listItemSelected";
+				item.style = styles.listItemSelected;
 				item.selected = true;
 			} else {
-				item.className = "";
+				item.style = '';
 				item.selected = false;
 			}
 		} 
 		return item;
 		});
+
+		console.log(selectedItems);
 
 		this.setState({
 			items: selectedItems,
@@ -99,24 +105,27 @@ class TodoListCustom extends Component {
 		if (this.state.items.length === 0) {
 			return null;
 		}
-		let tasks = this.state.items.map(item => item.name + " " + item.dueDate + " " + item.description + "\r\n");
-		let exportLink = document.createElement("a");
-		let file = new Blob(tasks, {type: 'text/plain'});
-		exportLink.href = URL.createObjectURL(file);
-		exportLink.download = "TodoList.txt";
-		exportLink.click();
+		const tasks = this.state.items.map(item => item.name + " " + item.dueDate + " " + item.description + "\r\n");
+		const path = FileSystem.documentDirectory + '/TodoList.txt';
+		FileSystem.writeAsStringAsync(path, tasks)
+			.then((success) => {
+				console.log('FILE WRITTEN!');
+			})
+			.catch((err) => {
+				console.log(err.message);
+			});
 	}
   
-	showUpdateModal(e) {
-		const buttonValue = e.target.value;
+	showUpdateModal(buttonValue) {
 		let isOpen = true;
-		if (buttonValue === 'edit') {
+		if (buttonValue === "edit") {
 			let selectedItems = this.state.items.filter(function (item) { return item.selected; });
+			console.log(selectedItems);
 			if (selectedItems.length > 1) { 
 				alert("More than one task selected. Please only select one for editing."); 
 				isOpen = false;
 			} else if( selectedItems.length === 0) {
-				alert("No task selected. Please selecte one for editing.");
+				alert("No task selected. Please select one for editing.");
 				isOpen = false;
 			} else {
 				let selectedItem = selectedItems[0];
@@ -133,10 +142,10 @@ class TodoListCustom extends Component {
 				description: '',
 			});
 		}
-
+		
 		this.setState({
 			showModal: isOpen,
-			modalType: e.target.value,
+			modalType: buttonValue,
 		});
 	}
 
@@ -145,7 +154,7 @@ class TodoListCustom extends Component {
 	};
 
 	taskNameHandler(e) {
-		this.setState({taskName: e.target.value});
+		this.setState({taskName: e});
 	}
 
 	dueDateHandler(date) {
@@ -153,23 +162,21 @@ class TodoListCustom extends Component {
 	}
 
 	descriptionHandler(e) {
-		this.setState({description: e.target.value});
+		this.setState({description: e});
 	}
   
 	render() {
 		return (
-			<View>
+			<View style={styles.todoListMain}>
 				<View>
-					
-						<Button onPress={this.showUpdateModal} value='add' title="Add" />
-						<Button onPress={this.showUpdateModal} value='edit' title="Edit" />
-						<Button onPress={this.exportList} title="Export" />
-						<Button onPress={this.deleteItems} title="Delete" />
-						<Button onPress={this.deleteAll} title="DeleteAll" />
-				
+						<Button style={styles.headerButton} onPress={this.showUpdateModal.bind(this, "add")} title="Add" />
+						<Button style={styles.headerButton} onPress={this.showUpdateModal.bind(this, "edit")} title="Edit" />
+						<Button style={styles.headerButton} onPress={this.exportList} title="Export" />
+						<Button style={styles.headerButton} onPress={this.deleteItems} title="Delete" />
+						<Button style={styles.headerButton} onPress={this.deleteAll} title="DeleteAll" />
 				</View>
-				
-				<Modal visible={this.state.showModal}>
+				<TodoCustomItems entries={this.state.items} select={this.selectItem}/>
+				<Modal visible={this.state.showModal} onRequestClose={this.hideModal}>
 					<Text h1>{this.state.modalType} a Task</Text>
 				
 						<Text>Name:</Text>
@@ -179,8 +186,8 @@ class TodoListCustom extends Component {
 						<Text>Description:</Text>
 						<TextInput value={this.state.description} onChangeText={this.descriptionHandler} />
 				
-					<Button onPress={() => {this.state.modalType === 'add' ? this.addItem() : this.editItem()}} title={this.state.modalType} />
-					<Button onPress={this.hideModal} title="Cancel" />
+					<Button title={this.state.modalType} onPress={() => {this.state.modalType === "add" ? this.addItem() : this.editItem()}} />
+					<Button title="Cancel" onPress={this.hideModal} />
 				</Modal>
 			</View>
 		);
@@ -188,5 +195,3 @@ class TodoListCustom extends Component {
 }
  
 export default TodoListCustom;
-//import TodoCustomItems from "./TodoCustomItems";
-//<TodoCustomItems entries={this.state.items} select={this.selectItem}/>
